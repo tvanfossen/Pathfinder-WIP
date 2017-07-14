@@ -5,26 +5,28 @@
 
 int main()
 {
-	int pOutBuffer[100000];
-	unsigned char xMap[100000];
+	int pOutBuffer[900];
+	unsigned char xMap[10000];
 	int length;
-	time_t t;
-	srand((unsigned) time(&t));
+	//time_t t;
+	//srand((unsigned) time(&t));
 
 	xMap[0] = 1;
 
     for (int j = 0; j<100000; j++)
     {
-        for (int i = 1; i<100000; i++)
+        for (int i = 1; i<10000; i++)
         {
             xMap[i] = rand()%2;
         }
 
-        length = FindPath(0, 0, 10, 15, xMap, 100, 100, pOutBuffer, 10000);
 
-        if (length>0)
+        length = FindPath(10, 10, 20, 20, xMap, 30, 30, pOutBuffer, 900);
+
+        if (length>=0)
         {
-            printf("Minimum path length of: %d\n\n", length);
+            finVisualize(0,0,xMap,30,30, pOutBuffer, 2500);
+            printf("\n\nMinimum path length of: %d\n\n", length);
             printf("Buffer: %d", pOutBuffer[0]);
             for (int i = 1; i<length; i++)
             {

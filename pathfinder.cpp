@@ -10,139 +10,99 @@ Date: 5-4-2017
 
 int FindPath(const int nStartX, const int nStartY, const int nTargetX, const int nTargetY, const unsigned char* pMap, const int nMapWidth, const int nMapHeight, int* pOutBuffer, const int nOutBufferSize)
 {
-	const int grid = nMapWidth*nMapHeight;
-	int* weighted = (int*)malloc(sizeof(int)*grid);
+    if (nOutBufferSize != 0)
+    {
+        const int grid = nMapWidth*nMapHeight;
+        int* weighted = (int*)malloc(sizeof(int)*grid);
 
-	for (int i = 0; i<nOutBufferSize; i++) //Initialize secondary matrix for use in weighting
-	{
-		pOutBuffer[i] = -1;
-	}
+        djikstra(nStartX, nStartY, pMap, weighted, nMapWidth, nMapHeight); //calculates a weighted matrix
+                                                                           //From weighted matrix, find minimum path length to target
+        int length = weighted[nTargetX + (nTargetY*nMapWidth)];
 
-	djikstra(nStartX, nStartY, pMap, weighted, nMapWidth, nMapHeight); //calculates a weighted matrix
-
-																	   //visualize(nStartX, nStartY, weighted, nMapWidth, nMapHeight);//debugging
-
-																	   //From weighted matrix, find minimum path length to target
-	int length = weighted[nTargetX + (nTargetY*nMapWidth)];
-
-	//Knowing the length reduces the size of the area to be searched for a path
-	if (length <= nOutBufferSize)
-	{
-		bufferPath(nStartX, nStartY, nTargetX, nTargetY, pMap, weighted, nMapWidth, nMapHeight, pOutBuffer, nOutBufferSize, length, 0);
-		return length;
-	}
-	else return -1;
+        //Knowing the length reduces the size of the area to be searched for a path
+        if (length <= nOutBufferSize)
+        {
+            bool temp = bufferPath(nStartX, nStartY, nTargetX, nTargetY, pMap, weighted, nMapWidth, nMapHeight, pOutBuffer, nOutBufferSize, length, 0);
+            if (temp)
+            {
+                return length;
+            }
+            else return -1;
+        }
+        else return -1;
+    }
+    else if (nStartX == nTargetX && nStartY == nTargetY)
+    {
+        return 0;
+    }
+    else return -1;
 }
 
 bool bufferPath(const int nStartX, const int nStartY, const int nTargetX, const int nTargetY, const unsigned char* pMap, const int* weighted, const int nMapWidth, const int nMapHeight, int* pOutBuffer, const int nOutBufferSize, const int minLength, const int bufferPos)
 {
-	int right, left, up, down;
-	bool flag = false;
-	right = (nStartX + 1) + nStartY*nMapWidth;
-	left = (nStartX - 1) + nStartY*nMapWidth;
-	up = nStartX + (nStartY - 1)*nMapWidth;
-	down = nStartX + (nStartY + 1)*nMapWidth;
+    int curPosition = nTargetX + nTargetY*nMapWidth;
+    int totalLength = weighted[curPosition];
 
+    int right = 1;
+    int left = -1;
+    int up = -1*nMapWidth;
+    int down = 1*nMapWidth;
 
-	/*printf("%d", pOutBuffer[0]); // debug
-	for (int i = 1; i<12; i++)
-	{
-		printf(", %d", pOutBuffer[i]);
-	}
-	printf("\n\n");*/
+	if (totalLength != -1)
+    {
+        for (int i = totalLength-1; i>=0; i--)
+        {
+            bool temp = false;
 
-	if (nStartX == nTargetX&&nStartY == nTargetY) //end case for the recursion, if it hits the endpoint, falls back on itself until origin
-	{
-		return true;
-	}
-	else if (bufferPos == 0)
-	{
-		for (int k = 0; k<5; k++)//Iterates through each of the possible adjacencies
-		{
-			//For each of the below cases: checks the next in the adjacent vertex to the max allowed length and that it was not previously stored(prevent early backtracking) and that it is within range of the matrix
-			if (!flag && nStartX + 1<nMapWidth && k == 0)
-			{
-				if (weighted[right] <= minLength&&weighted[right] != -1)
-				{
-					pOutBuffer[bufferPos] = right; // sets the buffer to the next position, will be overwritten if different path exists
-					flag = bufferPath(nStartX + 1, nStartY, nTargetX, nTargetY, pMap, weighted, nMapWidth, nMapHeight, pOutBuffer, nOutBufferSize, minLength, bufferPos + 1);
-				}
-			}
-			else if (!flag && nStartX - 1 >= 0 && k == 1)
-			{
-				if (weighted[left] <= minLength&&weighted[left] != -1)
-				{
-					pOutBuffer[bufferPos] = left;
-					flag = bufferPath(nStartX - 1, nStartY, nTargetX, nTargetY, pMap, weighted, nMapWidth, nMapHeight, pOutBuffer, nOutBufferSize, minLength, bufferPos + 1);
-				}
-			}
-			else if (!flag && nStartY - 1 >= 0 && k == 2)
-			{
-				if (weighted[up] <= minLength&&weighted[up] != -1)
-				{
-					pOutBuffer[bufferPos] = up;
-					flag = bufferPath(nStartX, nStartY - 1, nTargetX, nTargetY, pMap, weighted, nMapWidth, nMapHeight, pOutBuffer, nOutBufferSize, minLength, bufferPos + 1);
-				}
-			}
-			else if (!flag && nStartY + 1<nMapHeight && k == 3)
-			{
-				if (weighted[down] <= minLength&&weighted[down] != -1)
-				{
-					pOutBuffer[bufferPos] = down;
-					flag = bufferPath(nStartX, nStartY + 1, nTargetX, nTargetY, pMap, weighted, nMapWidth, nMapHeight, pOutBuffer, nOutBufferSize, minLength, bufferPos + 1);
-				}
-			}
-			else if (k == 5)
-			{
-				pOutBuffer[bufferPos] = -1;
-			}
-		}
-	}
-	else
-	{
-		for (int k = 0; k<5; k++)//Iterates through each of the possible adjacencies
-		{
-			//For each of the below cases: checks the next in the adjacent vertex to the max allowed length and that it was not previously stored(prevent early backtracking) and that it is within range of the matrix
-			if (!flag && nStartX + 1<nMapWidth && k == 0)
-			{
-				if (weighted[right] <= minLength&&weighted[right]>weighted[pOutBuffer[bufferPos - 1]])
-				{
-					pOutBuffer[bufferPos] = right; // sets the buffer to the next position, will be overwritten if different path exists
-					flag = bufferPath(nStartX + 1, nStartY, nTargetX, nTargetY, pMap, weighted, nMapWidth, nMapHeight, pOutBuffer, nOutBufferSize, minLength, bufferPos + 1);
-				}
-			}
-			else if (!flag && nStartX - 1 >= 0 && k == 1)
-			{
-				if (weighted[left] <= minLength&&weighted[left]>weighted[pOutBuffer[bufferPos - 1]])
-				{
-					pOutBuffer[bufferPos] = left;
-					flag = bufferPath(nStartX - 1, nStartY, nTargetX, nTargetY, pMap, weighted, nMapWidth, nMapHeight, pOutBuffer, nOutBufferSize, minLength, bufferPos + 1);
-				}
-			}
-			else if (!flag && nStartY - 1 >= 0 && k == 2)
-			{
-				if (weighted[up] <= minLength&&weighted[up]>weighted[pOutBuffer[bufferPos - 1]])
-				{
-					pOutBuffer[bufferPos] = up;
-					flag = bufferPath(nStartX, nStartY - 1, nTargetX, nTargetY, pMap, weighted, nMapWidth, nMapHeight, pOutBuffer, nOutBufferSize, minLength, bufferPos + 1);
-				}
-			}
-			else if (!flag && nStartY + 1<nMapHeight && k == 3)
-			{
-				if (weighted[down] <= minLength&&weighted[down]>weighted[pOutBuffer[bufferPos - 1]])
-				{
-					pOutBuffer[bufferPos] = down;
-					flag = bufferPath(nStartX, nStartY + 1, nTargetX, nTargetY, pMap, weighted, nMapWidth, nMapHeight, pOutBuffer, nOutBufferSize, minLength, bufferPos + 1);
-				}
-			}
-			else if (k == 5)
-			{
-				pOutBuffer[bufferPos] = -1;
-			}
-		}
-	}
+            if (curPosition + right < nMapWidth*nMapHeight && !temp)
+            {
+                if(weighted[curPosition + right] == i)
+                {
+                    //printf("%d : %d \n", weighted[curPosition+right], i);
+                    pOutBuffer[i] = curPosition;
+                    curPosition = curPosition+right;
+                    temp = true;
+                }
+            }
+            if (curPosition + left >=0 && !temp)
+            {
+                if (weighted[curPosition + left] == i)
+                {
+                    //printf("%d : %d \n", weighted[curPosition+left], i);
+                    pOutBuffer[i] = curPosition;
+                    curPosition = curPosition+left;
+                    temp = true;
+                }
+            }
+            if (curPosition + up >= 0 && !temp)
+            {
+                if (weighted[curPosition + up] == i)
+                {
+                    //printf("%d : %d \n", weighted[curPosition+up], i);
+                    pOutBuffer[i] = curPosition;
+                    curPosition = curPosition+up;
+                    temp = true;
+                }
 
-	return false;
+            }
+            if (curPosition + down < nMapWidth*nMapHeight && !temp)
+            {
+                if (weighted[curPosition + down] == i)
+                {
+                    //printf("%d : %d \n", weighted[curPosition+down],  i);
+                    pOutBuffer[i] = curPosition;
+                    curPosition = curPosition+down;
+                    temp = true;
+                }
+            }
+        }
+    }
+    else
+    {
+        return false;
+    }
+
+    return true;
 }
 
 void djikstra(const int nStartX, const int nStartY, const unsigned char* pMap, int* weighted, const int nMapWidth, const int nMapHeight)
@@ -166,7 +126,6 @@ void djikstra(const int nStartX, const int nStartY, const unsigned char* pMap, i
 			down = ((i + 1)*nMapWidth) + j;
 			up = ((i - 1)*nMapWidth) + j;
 
-			//visualize(nStartX, nStartY, weighted, nMapWidth, nMapHeight);
 
 			//printf("current: %d\ti: %d\tj: %d\n\n", current, i, j); //debugging
 
@@ -462,6 +421,8 @@ void djikstra(const int nStartX, const int nStartY, const unsigned char* pMap, i
 			}
 		}
 	}
+
+   //visualize(nStartX, nStartY, weighted, nMapWidth, nMapHeight);
 
 
 	return;
