@@ -3,29 +3,77 @@
 #include "pathfinder.h"
 #include <time.h>
 
+void directInput();
+void randomInput();
+
 int main()
 {
-	int pOutBuffer[900];
+    randomInput();
+
+    printf("completed");
+
+
+	while (true)
+	{
+
+	}
+
+	return 0;
+}
+
+void directInput()
+{
+    unsigned char pMap[] = {1, 1, 1, 1,
+                            0, 1, 0, 1,
+                            1, 1, 1, 1};
+    int pOutBuffer[12];
+
+    int length = FindPath(0,0,0,2,pMap,4,3,pOutBuffer,12);
+
+    printf("Length: %d\n", length);
+    printf("pOutBuffer: %d", pOutBuffer[0]);
+    for (int i = 1; i<length;i++)
+    {
+        printf(", %d", pOutBuffer[i]);
+    }
+    printf("\n\n");
+
+}
+
+void randomInput()
+{
+    int pOutBuffer[900];
 	unsigned char xMap[10000];
 	int length;
-	//time_t t;
-	//srand((unsigned) time(&t));
 
-	xMap[0] = 1;
 
-    for (int j = 0; j<100000; j++)
+	for (int i = 0; i<100; i++)
     {
-        for (int i = 1; i<10000; i++)
+        pOutBuffer[i] = -1;
+    }
+
+    for (int j = 0; j<10000000; j++)
+    {
+        int x;
+        if (j%10000 == 0)
+        {
+            x = j%101;
+            srand(x);
+        }
+        printf("%d : %d\n", j, x);
+
+        for (int i = 0; i<100; i++)
         {
             xMap[i] = rand()%2;
         }
+        //visualize(0,0,xMap,10,10);
+
+        length = FindPath(5, 0, 0, 10, xMap, 10, 10, pOutBuffer, 100);
 
 
-        length = FindPath(10, 10, 20, 20, xMap, 30, 30, pOutBuffer, 900);
-
+        /*
         if (length>=0)
         {
-            finVisualize(0,0,xMap,30,30, pOutBuffer, 2500);
             printf("\n\nMinimum path length of: %d\n\n", length);
             printf("Buffer: %d", pOutBuffer[0]);
             for (int i = 1; i<length; i++)
@@ -34,31 +82,6 @@ int main()
             }
             printf("\n\n");
         }
+        */
     }
-
-    printf("completed");
-
-	//int length = FindPath(2, 0, 0, 2, pMap, 3, 3, pOutBuffer, 7);
-
-
-	/*printf("Minimum path length of: %d\n\n", length);
-	printf("Buffer: %d", pOutBuffer[0]);
-	for (int i = 1; i<length; i++)
-	{
-		printf(", %d", pOutBuffer[i]);
-	}
-	printf("\n\n");
-	*/
-
-	//visualize(nStartX,nStartY,pMap,nMapWidth,nMapHeight);
-	//finVisualize(nStartX,nStartY,pMap,nMapWidth,nMapHeight,pOutBuffer,nOutBufferSize);
-
-	//printf("Runtime: %lu \n", endTV.tv_sec - startTV.tv_sec);
-
-	while (true)
-	{
-
-	}
-
-	return 0;
 }

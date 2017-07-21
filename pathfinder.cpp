@@ -1,6 +1,6 @@
 /*
 Author: Tristan VanFossen
-Date: 5-4-2017
+Date: 7-21-2017
 */
 
 #include <iostream>
@@ -12,33 +12,33 @@ int FindPath(const int nStartX, const int nStartY, const int nTargetX, const int
 {
     if (nOutBufferSize != 0)
     {
+        int length = -1;
         const int grid = nMapWidth*nMapHeight;
         int* weighted = (int*)malloc(sizeof(int)*grid);
+        for (int i = 0; i<nMapWidth*nMapHeight; i++)
+        {
+            weighted[i] = -1; //init matrix to "infinite" length
+        }
+        weighted[nStartX + nStartY*nMapWidth] = 0; // Always a length of 0 to start pos
+
 
         djikstra(nStartX, nStartY, pMap, weighted, nMapWidth, nMapHeight); //calculates a weighted matrix
-                                                                           //From weighted matrix, find minimum path length to target
-        int length = weighted[nTargetX + (nTargetY*nMapWidth)];
 
-        //Knowing the length reduces the size of the area to be searched for a path
-        if (length <= nOutBufferSize)
+        //visualize(nStartX, nStartY, weighted, nMapWidth, nMapHeight);
+
+        length = weighted[nTargetX + (nTargetY*nMapWidth)];
+
+        if (length >= 0 && length <= nOutBufferSize);
         {
-            bool temp = bufferPath(nStartX, nStartY, nTargetX, nTargetY, pMap, weighted, nMapWidth, nMapHeight, pOutBuffer, nOutBufferSize, length, 0);
-            if (temp)
-            {
-                return length;
-            }
-            else return -1;
+            bool temp = bufferPath(nStartX,nStartY,nTargetX,nTargetY,pMap,weighted,nMapWidth,nMapHeight,pOutBuffer,nOutBufferSize);
         }
-        else return -1;
-    }
-    else if (nStartX == nTargetX && nStartY == nTargetY)
-    {
-        return 0;
+
+        return length;
     }
     else return -1;
 }
 
-bool bufferPath(const int nStartX, const int nStartY, const int nTargetX, const int nTargetY, const unsigned char* pMap, const int* weighted, const int nMapWidth, const int nMapHeight, int* pOutBuffer, const int nOutBufferSize, const int minLength, const int bufferPos)
+bool bufferPath(const int nStartX, const int nStartY, const int nTargetX, const int nTargetY, const unsigned char* pMap, const int* weighted, const int nMapWidth, const int nMapHeight, int* pOutBuffer, const int nOutBufferSize)
 {
     int curPosition = nTargetX + nTargetY*nMapWidth;
     int totalLength = weighted[curPosition];
@@ -48,10 +48,13 @@ bool bufferPath(const int nStartX, const int nStartY, const int nTargetX, const 
     int up = -1*nMapWidth;
     int down = 1*nMapWidth;
 
-	if (totalLength != -1)
+
+	if (totalLength != -1 && totalLength != 0)
     {
         for (int i = totalLength-1; i>=0; i--)
         {
+            //visualize(nStartX, nStartY, weighted, nMapWidth,nMapHeight);
+            //printf("%d : %d : %d : %d\n", curPosition+right, curPosition+left, curPosition+up, curPosition+down);
             bool temp = false;
 
             if (curPosition + right < nMapWidth*nMapHeight && !temp)
@@ -85,7 +88,7 @@ bool bufferPath(const int nStartX, const int nStartY, const int nTargetX, const 
                 }
 
             }
-            if (curPosition + down < nMapWidth*nMapHeight && !temp)
+            if (curPosition + down < nMapWidth*nMapHeight &&  !temp)
             {
                 if (weighted[curPosition + down] == i)
                 {
@@ -105,324 +108,61 @@ bool bufferPath(const int nStartX, const int nStartY, const int nTargetX, const 
     return true;
 }
 
+
+
+
 void djikstra(const int nStartX, const int nStartY, const unsigned char* pMap, int* weighted, const int nMapWidth, const int nMapHeight)
 {
-	int current, right, left, down, up;
+    int curPosition = nStartX + nStartY*nMapWidth;
+	int right = 1;
+    int left = -1;
+    int up = -1*nMapWidth;
+    int down = 1*nMapWidth;
 
-	for (int i = 0; i<nMapWidth*nMapHeight; i++)
-	{
-		weighted[i] = -1; //init matrix to "infinite" length
-	}
-	weighted[nStartX + nStartY*nMapWidth] = 0; // Always a length of 0 to start pos
-
-	for (int i = 0; i < nMapHeight; i++) //Djikstra's Algorithm -> weighted matrix
-	{                                    // Running from start of array
-		for (int j = 0; j < nMapWidth; j++)
-		{
-
-			current = (i*nMapWidth) + j;
-			right = (i*nMapWidth) + (j + 1);
-			left = (i*nMapWidth) + (j - 1);
-			down = ((i + 1)*nMapWidth) + j;
-			up = ((i - 1)*nMapWidth) + j;
-
-
-			//printf("current: %d\ti: %d\tj: %d\n\n", current, i, j); //debugging
-
-			if (pMap[right] == 1 && pMap[current] != 0 && weighted[current] != -1 && j + 1<nMapWidth)
-			{
-				//  printf("\t Right open\n"); //for debugging
-				if (weighted[right] == -1)
-				{
-					weighted[right] = weighted[current] + 1;
-				}
-				else if (weighted[right] != -1)
-				{
-					if (weighted[right] >= weighted[current] + 1)
-					{
-						weighted[right] = weighted[current] + 1;
-					}
-				}
-			}
-			if (pMap[left] == 1 && pMap[current] != 0 && weighted[current] != -1 && j - 1 >= 0)
-			{
-				//printf("\t Left open\n");//debugging
-				if (weighted[left] == -1)
-				{
-					weighted[left] = weighted[current] + 1;
-				}
-				else if (weighted[left] != -1)
-				{
-					if (weighted[left] > weighted[current] + 1)
-					{
-						weighted[left] = weighted[current] + 1;
-					}
-				}
-			}
-			if (pMap[down] == 1 && pMap[current] != 0 && weighted[current] != -1 && i + 1<nMapHeight)
-			{
-				//printf("\t Down open\n");//debugging
-				if (weighted[down] == -1)
-				{
-					weighted[down] = weighted[current] + 1;
-				}
-				else if (weighted[down] != -1)
-				{
-					if (weighted[down] > weighted[current] + 1)
-					{
-						weighted[down] = weighted[current] + 1;
-					}
-				}
-			}
-			if (pMap[up] == 1 && pMap[current] != 0 && weighted[current] != -1 && i - 1 >= 0)
-			{
-				//printf("\t Up open\n");//debugging
-				if (weighted[up] == -1)
-				{
-					weighted[up] = weighted[current] + 1;
-				}
-				else if (weighted[up] != -1)
-				{
-					if (weighted[up] > weighted[current] + 1)
-					{
-						weighted[up] = weighted[current] + 1;
-					}
-				}
-			}
-		}
-	}
-
-	for (int i = nMapHeight - 1; i >= 0; i--) //Djikstra's Algorithm -> weighted matrix
-	{                                       // Running second time to catch any missed positions
-		for (int j = nMapWidth - 1; j >= 0; j--)
-		{
-			current = (i*nMapWidth) + j;
-			right = (i*nMapWidth) + (j + 1);
-			left = (i*nMapWidth) + (j - 1);
-			down = ((i + 1)*nMapWidth) + j;
-			up = ((i - 1)*nMapWidth) + j;
-
-			//visualize(nStartX, nStartY, weighted, nMapWidth, nMapHeight);
-
-			//printf("current: %d\ti: %d\tj: %d\n\n", current, i, j); //debugging
-
-			if (pMap[right] == 1 && pMap[current] != 0 && weighted[current] != -1 && j + 1<nMapWidth)
-			{
-				//  printf("\t Right open\n"); //for debugging
-				if (weighted[right] == -1)
-				{
-					weighted[right] = weighted[current] + 1;
-				}
-				else if (weighted[right] != -1)
-				{
-					if (weighted[right] >= weighted[current] + 1)
-					{
-						weighted[right] = weighted[current] + 1;
-					}
-				}
-			}
-			if (pMap[left] == 1 && pMap[current] != 0 && weighted[current] != -1 && j - 1 >= 0)
-			{
-				//printf("\t Left open\n");//debugging
-				if (weighted[left] == -1)
-				{
-					weighted[left] = weighted[current] + 1;
-				}
-				else if (weighted[left] != -1)
-				{
-					if (weighted[left] > weighted[current] + 1)
-					{
-						weighted[left] = weighted[current] + 1;
-					}
-				}
-			}
-			if (pMap[down] == 1 && pMap[current] != 0 && weighted[current] != -1 && i + 1<nMapHeight)
-			{
-				//printf("\t Down open\n");//debugging
-				if (weighted[down] == -1)
-				{
-					weighted[down] = weighted[current] + 1;
-				}
-				else if (weighted[down] != -1)
-				{
-					if (weighted[down] > weighted[current] + 1)
-					{
-						weighted[down] = weighted[current] + 1;
-					}
-				}
-			}
-			if (pMap[up] == 1 && pMap[current] != 0 && weighted[current] != -1 && i - 1 >= 0)
-			{
-				//printf("\t Up open\n");//debugging
-				if (weighted[up] == -1)
-				{
-					weighted[up] = weighted[current] + 1;
-				}
-				else if (weighted[up] != -1)
-				{
-					if (weighted[up] > weighted[current] + 1)
-					{
-						weighted[up] = weighted[current] + 1;
-					}
-				}
-			}
-		}
-	}
-	for (int i = 0; i <nMapHeight; i++) //Djikstra's Algorithm -> weighted matrix
-	{                                       // Running sthird time to catch missed positions (Top right corner
-		for (int j = nMapWidth - 1; j >= 0; j--)
-		{
-			current = (i*nMapWidth) + j;
-			right = (i*nMapWidth) + (j + 1);
-			left = (i*nMapWidth) + (j - 1);
-			down = ((i + 1)*nMapWidth) + j;
-			up = ((i - 1)*nMapWidth) + j;
-
-			//visualize(nStartX, nStartY, weighted, nMapWidth, nMapHeight);
-
-			//printf("current: %d\ti: %d\tj: %d\n\n", current, i, j); //debugging
-
-			if (pMap[right] == 1 && pMap[current] != 0 && weighted[current] != -1 && j + 1<nMapWidth)
-			{
-				//  printf("\t Right open\n"); //for debugging
-				if (weighted[right] == -1)
-				{
-					weighted[right] = weighted[current] + 1;
-				}
-				else if (weighted[right] != -1)
-				{
-					if (weighted[right] >= weighted[current] + 1)
-					{
-						weighted[right] = weighted[current] + 1;
-					}
-				}
-			}
-			if (pMap[left] == 1 && pMap[current] != 0 && weighted[current] != -1 && j - 1 >= 0)
-			{
-				//printf("\t Left open\n");//debugging
-				if (weighted[left] == -1)
-				{
-					weighted[left] = weighted[current] + 1;
-				}
-				else if (weighted[left] != -1)
-				{
-					if (weighted[left] > weighted[current] + 1)
-					{
-						weighted[left] = weighted[current] + 1;
-					}
-				}
-			}
-			if (pMap[down] == 1 && pMap[current] != 0 && weighted[current] != -1 && i + 1<nMapHeight)
-			{
-				//printf("\t Down open\n");//debugging
-				if (weighted[down] == -1)
-				{
-					weighted[down] = weighted[current] + 1;
-				}
-				else if (weighted[down] != -1)
-				{
-					if (weighted[down] > weighted[current] + 1)
-					{
-						weighted[down] = weighted[current] + 1;
-					}
-				}
-			}
-			if (pMap[up] == 1 && pMap[current] != 0 && weighted[current] != -1 && i - 1 >= 0)
-			{
-				//printf("\t Up open\n");//debugging
-				if (weighted[up] == -1)
-				{
-					weighted[up] = weighted[current] + 1;
-				}
-				else if (weighted[up] != -1)
-				{
-					if (weighted[up] > weighted[current] + 1)
-					{
-						weighted[up] = weighted[current] + 1;
-					}
-				}
-			}
-		}
-	}
-
-	for (int i = nMapHeight - 1; i >= 0; i--) //Djikstra's Algorithm -> weighted matrix
-	{                                       // Running second time to catch any missed positions
-		for (int j = 0; j <nMapWidth; j++)
-		{
-			current = (i*nMapWidth) + j;
-			right = (i*nMapWidth) + (j + 1);
-			left = (i*nMapWidth) + (j - 1);
-			down = ((i + 1)*nMapWidth) + j;
-			up = ((i - 1)*nMapWidth) + j;
-
-			//visualize(nStartX, nStartY, weighted, nMapWidth, nMapHeight);
-
-			//printf("current: %d\ti: %d\tj: %d\n\n", current, i, j); //debugging
-
-			if (pMap[right] == 1 && pMap[current] != 0 && weighted[current] != -1 && j + 1<nMapWidth)
-			{
-				//  printf("\t Right open\n"); //for debugging
-				if (weighted[right] == -1)
-				{
-					weighted[right] = weighted[current] + 1;
-				}
-				else if (weighted[right] != -1)
-				{
-					if (weighted[right] >= weighted[current] + 1)
-					{
-						weighted[right] = weighted[current] + 1;
-					}
-				}
-			}
-			if (pMap[left] == 1 && pMap[current] != 0 && weighted[current] != -1 && j - 1 >= 0)
-			{
-				//printf("\t Left open\n");//debugging
-				if (weighted[left] == -1)
-				{
-					weighted[left] = weighted[current] + 1;
-				}
-				else if (weighted[left] != -1)
-				{
-					if (weighted[left] > weighted[current] + 1)
-					{
-						weighted[left] = weighted[current] + 1;
-					}
-				}
-			}
-			if (pMap[down] == 1 && pMap[current] != 0 && weighted[current] != -1 && i + 1<nMapHeight)
-			{
-				//printf("\t Down open\n");//debugging
-				if (weighted[down] == -1)
-				{
-					weighted[down] = weighted[current] + 1;
-				}
-				else if (weighted[down] != -1)
-				{
-					if (weighted[down] > weighted[current] + 1)
-					{
-						weighted[down] = weighted[current] + 1;
-					}
-				}
-			}
-			if (pMap[up] == 1 && pMap[current] != 0 && weighted[current] != -1 && i - 1 >= 0)
-			{
-				//printf("\t Up open\n");//debugging
-				if (weighted[up] == -1)
-				{
-					weighted[up] = weighted[current] + 1;
-				}
-				else if (weighted[up] != -1)
-				{
-					if (weighted[up] > weighted[current] + 1)
-					{
-						weighted[up] = weighted[current] + 1;
-					}
-				}
-			}
-		}
-	}
-
-   //visualize(nStartX, nStartY, weighted, nMapWidth, nMapHeight);
+    if (curPosition + right < nMapWidth*nMapHeight && nStartX + 1 < nMapWidth)
+    {
+        if (pMap[curPosition + right] == 1)
+        {
+            if (weighted[curPosition + right] > weighted[curPosition] + 1 || weighted[curPosition + right] == -1)
+            {
+                weighted[curPosition + right] = weighted[curPosition] + 1;
+                djikstra(nStartX + 1, nStartY, pMap, weighted, nMapWidth, nMapHeight);
+            }
+        }
+    }
+    if (curPosition + down < nMapWidth*nMapHeight && nStartY + 1 < nMapHeight)
+    {
+        if (pMap[curPosition + down] == 1)
+        {
+            if (weighted[curPosition + down] > weighted[curPosition] + 1 || weighted[curPosition + down] == -1)
+            {
+                weighted[curPosition + down] = weighted[curPosition] + 1;
+                djikstra(nStartX, nStartY + 1, pMap, weighted, nMapWidth, nMapHeight);
+            }
+        }
+    }
+    if (curPosition + left >= 0 && nStartX - 1 >= 0)
+    {
+        if (pMap[curPosition + left] == 1)
+        {
+            if (weighted[curPosition + left] > weighted[curPosition] + 1 || weighted[curPosition + left] == -1)
+            {
+                weighted[curPosition + left] = weighted[curPosition] + 1;
+                djikstra(nStartX - 1, nStartY, pMap, weighted, nMapWidth, nMapHeight);
+            }
+        }
+    }
+    if (curPosition + up >= 0 && nStartY - 1 >= 0)
+    {
+        if (pMap[curPosition + up] == 1)
+        {
+            if (weighted[curPosition + up] > weighted[curPosition] + 1 || weighted[curPosition + up] == -1)
+            {
+                weighted[curPosition + up] = weighted[curPosition] + 1;
+                djikstra(nStartX, nStartY - 1, pMap, weighted, nMapWidth, nMapHeight);
+            }
+        }
+    }
 
 
 	return;
