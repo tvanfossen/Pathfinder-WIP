@@ -8,7 +8,7 @@ void randomInput();
 
 int main()
 {
-    directInput();
+    randomInput();
 
     printf("completed");
 
@@ -49,17 +49,17 @@ void directInput()
 
 void randomInput()
 {
-    int pOutBuffer[900];
+    int pOutBuffer[1000000];
 	unsigned char xMap[10000];
 	int length;
 
 
-	for (int i = 0; i<100; i++)
+	for (int i = 0; i<10000; i++)
     {
         pOutBuffer[i] = -1;
     }
 
-    for (int j = 0; j<10000000; j++)
+    for (int j = 0; j<1000000; j++)
     {
         int x;
         if (j%10000 == 0)
@@ -67,20 +67,21 @@ void randomInput()
             x = j%101;
             srand(x);
         }
-        printf("%d : %d\n", j, x);
-
-        for (int i = 0; i<100; i++)
+       // printf("%d : %d\n", j, x);
+	
+        for (int i = 0; i<1000000; i++)
         {
             xMap[i] = rand()%2;
         }
         //visualize(0,0,xMap,10,10);
 
-        length = FindPath(5, 0, 0, 10, xMap, 10, 10, pOutBuffer, 100);
+        length = FindPath(0, 0, 15, 15, xMap, 1000, 1000, pOutBuffer, 1000000);
 
 
-        /*
+        printf("\nGrids processed: %d", j);
         if (length>=0)
         {
+            //printf("Grids Processed: %d\n", j);
             printf("\n\nMinimum path length of: %d\n\n", length);
             printf("Buffer: %d", pOutBuffer[0]);
             for (int i = 1; i<length; i++)
@@ -89,6 +90,6 @@ void randomInput()
             }
             printf("\n\n");
         }
-        */
+        
     }
 }

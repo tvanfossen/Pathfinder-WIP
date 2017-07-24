@@ -27,7 +27,7 @@ int FindPath(const int nStartX, const int nStartY, const int nTargetX, const int
 
         length = weighted[nTargetX + (nTargetY*nMapWidth)];
 
-        if (length >= 0 && length <= nOutBufferSize);
+        if (length >= 0 && length <= nOutBufferSize)
         {
             bufferPath(nStartX,nStartY,nTargetX,nTargetY,pMap,weighted,nMapWidth,nMapHeight,pOutBuffer,nOutBufferSize);
         }
