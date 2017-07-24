@@ -8,7 +8,7 @@ void randomInput();
 
 int main()
 {
-    randomInput();
+    directInput();
 
     printf("completed");
 
@@ -23,10 +23,17 @@ int main()
 
 void directInput()
 {
+    /*unsigned char pMap[] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                            0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+                            1, 1, 1, 1, 1, 0, 0, 1, 1, 1,
+                            1, 0, 0, 0, 1, 1, 1, 1, 0, 1,
+                            1, 0, 0, 1, 0, 0, 1, 1, 1, 1,
+                            1, 0, 0, 1, 0, 0, 1, 0, 0, 0,
+                            1, 1, 1, 1, 0, 1, 1, 0, 0, 0};*/
     unsigned char pMap[] = {1, 1, 1, 1,
                             0, 1, 0, 1,
-                            1, 1, 1, 1};
-    int pOutBuffer[12];
+                            1, 1, 0, 1};
+    int pOutBuffer[70];
 
     int length = FindPath(0,0,0,2,pMap,4,3,pOutBuffer,12);
 
