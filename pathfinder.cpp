@@ -27,9 +27,9 @@ int FindPath(const int nStartX, const int nStartY, const int nTargetX, const int
 
         length = weighted[nTargetX + (nTargetY*nMapWidth)];
 
-        if (length >= 0 && length <= nOutBufferSize)
+        if (length >= 0 && length <= nOutBufferSize);
         {
-            bufferPath(nStartX,nStartY,nTargetX,nTargetY,pMap,weighted,nMapWidth,nMapHeight,pOutBuffer,nOutBufferSize);
+            bool temp = bufferPath(nStartX,nStartY,nTargetX,nTargetY,pMap,weighted,nMapWidth,nMapHeight,pOutBuffer,nOutBufferSize);
         }
 
         return length;
@@ -209,14 +209,14 @@ void visualize(const int nStartX, const int nStartY, const unsigned char* pMap, 
 	return;
 }
 
-void finVisualize(const int nStartX, const int nStartY, const unsigned char* pMap, const int nMapWidth, const int nMapHeight, const int* pOutBuffer, const int nOutBufferSize)//For reg graph
+void finVisualize(const int nStartX, const int nStartY, const unsigned char* pMap, const int nMapWidth, const int nMapHeight, const int* pOutBuffer, const int length)//For reg graph
 {
 	bool flag;
 	//visualization
 	for (int i = 0; i<nMapHeight*nMapWidth; i++)
 	{
 		flag = false;
-		for (int j = 0; j<nOutBufferSize; j++)
+		for (int j = 0; j<length; j++)
 		{
 			if (pOutBuffer[j] == i) flag = true;
 		}
