@@ -8,13 +8,14 @@ Date: 7-21-2017
 #include <stdlib.h>     /* srand, rand */
 #include "pathfinder.h"
 
+
 int FindPath(const int nStartX, const int nStartY, const int nTargetX, const int nTargetY, const unsigned char* pMap, const int nMapWidth, const int nMapHeight, int* pOutBuffer, const int nOutBufferSize)
 {
     if (nOutBufferSize != 0)
     {
         int length = -1;
         const int grid = nMapWidth*nMapHeight;
-        int* weighted = (int*)malloc(sizeof(int)*grid);
+        short* weighted = (short*)malloc(sizeof(short)*grid);
         for (int i = 0; i<nMapWidth*nMapHeight; i++)
         {
             weighted[i] = -1; //init matrix to "infinite" length
@@ -29,65 +30,59 @@ int FindPath(const int nStartX, const int nStartY, const int nTargetX, const int
 
         if (length >= 0 && length <= nOutBufferSize);
         {
-            bool temp = bufferPath(nStartX,nStartY,nTargetX,nTargetY,pMap,weighted,nMapWidth,nMapHeight,pOutBuffer,nOutBufferSize);
+            bufferPath(nStartX,nStartY,nTargetX,nTargetY,pMap,weighted,nMapWidth,nMapHeight,pOutBuffer,nOutBufferSize);
         }
-
+        free(weighted);
         return length;
     }
     else return -1;
 }
 
-bool bufferPath(const int nStartX, const int nStartY, const int nTargetX, const int nTargetY, const unsigned char* pMap, const int* weighted, const int nMapWidth, const int nMapHeight, int* pOutBuffer, const int nOutBufferSize)
+bool bufferPath(const int nStartX, const int nStartY, const int nTargetX, const int nTargetY, const unsigned char* pMap, const short* weighted, const int nMapWidth, const int nMapHeight, int* pOutBuffer, const int nOutBufferSize)
 {
     int curPosition = nTargetX + nTargetY*nMapWidth;
-    int totalLength = weighted[curPosition];
-
-    int right = 1;
-    int left = -1;
-    int up = -1*nMapWidth;
-    int down = 1*nMapWidth;
 
 
-	if (totalLength != -1 && totalLength != 0)
+	if (weighted[curPosition] != -1 && weighted[curPosition] != 0)
     {
-        for (int i = totalLength-1; i>=0; i--)
+        for (int i = weighted[curPosition]-1; i>=0; --i)
         {
             bool temp = false;
 
-            if (curPosition + right < nMapWidth*nMapHeight && !temp)
+            if (curPosition + 1 < nMapWidth*nMapHeight && !temp)
             {
-                if(weighted[curPosition + right] == i)
+                if(weighted[curPosition + 1] == i)
                 {
                     pOutBuffer[i] = curPosition;
-                    curPosition = curPosition+right;
+                    curPosition = curPosition+1;
                     temp = true;
                 }
             }
-            if (curPosition + left >=0 && !temp)
+            if (curPosition + -1 >=0 && !temp)
             {
-                if (weighted[curPosition + left] == i)
+                if (weighted[curPosition + -1] == i)
                 {
                     pOutBuffer[i] = curPosition;
-                    curPosition = curPosition+left;
+                    curPosition = curPosition+-1;
                     temp = true;
                 }
             }
-            if (curPosition + up >= 0 && !temp)
+            if (curPosition + -1*nMapWidth >= 0 && !temp)
             {
-                if (weighted[curPosition + up] == i)
+                if (weighted[curPosition + -1*nMapWidth] == i)
                 {
                     pOutBuffer[i] = curPosition;
-                    curPosition = curPosition+up;
+                    curPosition = curPosition+-1*nMapWidth;
                     temp = true;
                 }
 
             }
-            if (curPosition + down < nMapWidth*nMapHeight &&  !temp)
+            if (curPosition + 1*nMapWidth < nMapWidth*nMapHeight &&  !temp)
             {
-                if (weighted[curPosition + down] == i)
+                if (weighted[curPosition + 1*nMapWidth] == i)
                 {
                     pOutBuffer[i] = curPosition;
-                    curPosition = curPosition+down;
+                    curPosition = curPosition+1*nMapWidth;
                     temp = true;
                 }
             }
@@ -102,66 +97,60 @@ bool bufferPath(const int nStartX, const int nStartY, const int nTargetX, const 
 }
 
 
-void djikstra(const int nStartX, const int nStartY, const unsigned char* pMap, int* weighted, const int nMapWidth, const int nMapHeight, const int length)
+void djikstra(const int nStartX, const int nStartY, const unsigned char* pMap, short* weighted, const int nMapWidth, const int nMapHeight, const int length)
 {
-    int curPosition = nStartX + nStartY*nMapWidth;
-	int right = 1;
-    int left = -1;
-    int up = -1*nMapWidth;
-    int down = 1*nMapWidth;
-
     //visualize(nStartX, nStartY, weighted, nMapWidth, nMapHeight);
 
-    if (curPosition + right < nMapWidth*nMapHeight && nStartX + 1 < nMapWidth)
+    if (nStartX + nStartY*nMapWidth + 1 < nMapWidth*nMapHeight && nStartX + 1 < nMapWidth)
     { // Checks to ensure the next point accessed is within array bounds
-        if (pMap[curPosition + right] == 1)
+        if (pMap[nStartX + nStartY*nMapWidth + 1] == 1)
         { // Checks to ensure next point checked is a valid path
-            if (weighted[curPosition + right] > weighted[curPosition] + 1 || weighted[curPosition + right] == -1)
-            { //Checks to ensure an update is necessary to the next weight, if so updates and then recurses
-                weighted[curPosition + right] = weighted[curPosition] + 1;
-                if (weighted[curPosition + right] < length)
+            if (weighted[nStartX + nStartY*nMapWidth + 1] > weighted[nStartX + nStartY*nMapWidth] + 1 || weighted[nStartX + nStartY*nMapWidth + 1] == -1)
+            { //Checks to ensure an -1*nMapWidthdate is necessary to the next weight, if so -1*nMapWidthdates and then recurses
+                weighted[nStartX + nStartY*nMapWidth + 1] = weighted[nStartX + nStartY*nMapWidth] + 1;
+                if (weighted[nStartX + nStartY*nMapWidth + 1] < length)
                 {
                     djikstra(nStartX + 1, nStartY, pMap, weighted, nMapWidth, nMapHeight, length);
                 }
             }
         }
     }
-    if (curPosition + down < nMapWidth*nMapHeight && nStartY + 1 < nMapHeight)
+    if (nStartX + nStartY*nMapWidth + 1*nMapWidth < nMapWidth*nMapHeight && nStartY + 1 < nMapHeight)
     {
-        if (pMap[curPosition + down] == 1)
+        if (pMap[nStartX + nStartY*(nMapWidth) + 1*nMapWidth] == 1)
         {
-            if (weighted[curPosition + down] > weighted[curPosition] + 1 || weighted[curPosition + down] == -1)
+            if (weighted[nStartX + nStartY*nMapWidth + 1*nMapWidth] > weighted[nStartX + nStartY*nMapWidth] + 1 || weighted[nStartX + nStartY*nMapWidth + 1*nMapWidth] == -1)
             {
-                weighted[curPosition + down] = weighted[curPosition] + 1;
-                if (weighted[curPosition+down] < length)
+                weighted[nStartX + nStartY*nMapWidth + 1*nMapWidth] = weighted[nStartX + nStartY*nMapWidth] + 1;
+                if (weighted[nStartX + nStartY*nMapWidth+1*nMapWidth] < length)
                 {
                     djikstra(nStartX, nStartY + 1, pMap, weighted, nMapWidth, nMapHeight, length);
                 }
             }
         }
     }
-    if (curPosition + left >= 0 && nStartX - 1 >= 0)
+    if (nStartX + nStartY*nMapWidth + -1 >= 0 && nStartX - 1 >= 0)
     {
-        if (pMap[curPosition + left] == 1)
+        if (pMap[nStartX + nStartY*nMapWidth + -1] == 1)
         {
-            if (weighted[curPosition + left] > weighted[curPosition] + 1 || weighted[curPosition + left] == -1)
+            if (weighted[nStartX + nStartY*nMapWidth + -1] > weighted[nStartX + nStartY*nMapWidth] + 1 || weighted[nStartX + nStartY*nMapWidth + -1] == -1)
             {
-                weighted[curPosition + left] = weighted[curPosition] + 1;
-                if (weighted[curPosition + left] < length)
+                weighted[nStartX + nStartY*nMapWidth + -1] = weighted[nStartX + nStartY*nMapWidth] + 1;
+                if (weighted[nStartX + nStartY*nMapWidth + -1] < length)
                 {
                    djikstra(nStartX - 1, nStartY, pMap, weighted, nMapWidth, nMapHeight, length);
                 }
             }
         }
     }
-    if (curPosition + up >= 0 && nStartY - 1 >= 0)
+    if (nStartX + nStartY*nMapWidth + -1*nMapWidth >= 0 && nStartY - 1 >= 0)
     {
-        if (pMap[curPosition + up] == 1)
+        if (pMap[nStartX + nStartY*nMapWidth + -1*nMapWidth] == 1)
         {
-            if (weighted[curPosition + up] > weighted[curPosition] + 1 || weighted[curPosition + up] == -1)
+            if (weighted[nStartX + nStartY*nMapWidth + -1*nMapWidth] > weighted[nStartX + nStartY*nMapWidth] + 1 || weighted[nStartX + nStartY*nMapWidth + -1*nMapWidth] == -1)
             {
-                weighted[curPosition + up] = weighted[curPosition] + 1;
-                if (weighted[curPosition + up] < length)
+                weighted[nStartX + nStartY*nMapWidth + -1*nMapWidth] = weighted[nStartX + nStartY*nMapWidth] + 1;
+                if (weighted[nStartX + nStartY*nMapWidth + -1*nMapWidth] < length)
                 {
                     djikstra(nStartX, nStartY - 1, pMap, weighted, nMapWidth, nMapHeight, length);
                 }
@@ -173,13 +162,16 @@ void djikstra(const int nStartX, const int nStartY, const unsigned char* pMap, i
 	return;
 }
 
-void visualize(const int nStartX, const int nStartY, const int* pMap, const int nMapWidth, const int nMapHeight)//For weighted graph
+void visualize(const int nStartX, const int nStartY, const short* pMap, const int nMapWidth, const int nMapHeight)//For weighted graph
 {
 	//visualization
 	for (int i = 0; i<nMapHeight*nMapWidth; i++)
 	{
-
-		printf("%d\t", pMap[i]);
+        if (pMap[i] == -1)
+        {
+            printf("#\t");
+        }
+        else printf("%d\t", pMap[i]);
 
 		if (i%nMapWidth == nMapWidth - 1)
 		{

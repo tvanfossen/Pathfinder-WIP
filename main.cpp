@@ -6,8 +6,11 @@
 void directInput();
 void randomInput();
 
+
 int main()
 {
+
+
     randomInput();
 
     printf("completed");
@@ -23,19 +26,19 @@ int main()
 
 void directInput()
 {
-    /*unsigned char pMap[] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                            0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
-                            1, 1, 1, 1, 1, 0, 0, 1, 1, 1,
-                            1, 0, 0, 0, 1, 1, 1, 1, 0, 1,
-                            1, 0, 0, 1, 0, 0, 1, 1, 1, 1,
-                            1, 0, 0, 1, 0, 0, 1, 0, 0, 0,
-                            1, 1, 1, 1, 0, 1, 1, 0, 0, 0};*/
-    unsigned char pMap[] = {1, 1, 1, 1,
+    unsigned char pMap[] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+                            1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1,
+                            1, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                            1, 0, 0, 1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                            1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+    /*unsigned char pMap[] = {1, 1, 1, 1,
                             0, 1, 0, 1,
-                            1, 1, 0, 1};
+                            1, 1, 0, 1};*/
     int pOutBuffer[70];
 
-    int length = FindPath(0,0,0,2,pMap,4,3,pOutBuffer,12);
+    int length = FindPath(0,0,18,6,pMap,19,7,pOutBuffer,70);
 
     printf("Length: %d\n", length);
     printf("pOutBuffer: %d", pOutBuffer[0]);
@@ -51,16 +54,24 @@ void randomInput()
 {
     int pOutBuffer[10000];
     unsigned char xMap[100000];
+    int seed = 0;
     srand(0);
 
-    for (int i = 0; i<99999; i++)
+    for (int i = 0; i<10000000; i++)
     {
+        if (i%100000 == 0)
+        {
+            printf("%d\n", i);
+        }
+        //printf("\n%d\n", i);
+
         for (int j = 0; j<900; j++)
         {
             xMap[j] = rand()%2;
         }
 
-        int length = FindPath(0,0,15,15,xMap,30,30,pOutBuffer,500);
+
+        int length = FindPath(20,25,0,0,xMap,30,30,pOutBuffer,10000);
 
 
 
